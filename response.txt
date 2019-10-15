@@ -1,0 +1,104 @@
+Responses DRMAN Project
+
+/CreateUser
+
+0 -------> not enough inputs
+1 -------> user with that username or email exists
+2 -------> invalid type_id
+3 -------> invalid institute_id
+4 -------> invalid proficiency_id
+
+/login
+
+1 -------> invalid institute_id
+0 -------> username or password wrong
+
+/CreatePrescription
+
+0 -------> you are not doctor
+1 -------> not enough inputs
+2 -------> lab not found
+3 -------> patient not found
+4 -------> clinic not found
+
+/ListPrescription?institute_id=
+
+1 ------> not found institute_id
+2 ------> no access
+0 ------> no prescription
+
+/Search_Patient?patient_name=
+
+1 ------> no found
+0 ------>not enough inputs
+
+/Search_Lab?lab_name=
+
+1 ------> no found
+0 ------>not enough inputs
+
+/Search_Clinic?clinic_name=
+
+1 ------> no found
+0 ------>not enough inputs
+
+/Search_Prescription?national_code= &institute_id=
+
+0 -----> no prescription
+1 -----> invalid institute_id
+2 -----> no access
+3 -----> not found patient
+
+/Create_Result
+
+0 -----> not found prescription
+1------->invalid institte_id
+2 ------> no access
+3 -----> enter inputs
+4 -----> created
+
+/Edit_Result
+
+0 -----> no found prescription
+1 -----> invalid institte_id
+2 -----> no access
+3 -----> enter inputs
+4 -----> updated
+
+/Submit_Result
+
+0 -----> no found prescription
+1 -----> invalid institute_id
+2 -----> no access
+3 ----->please enter agree == 1
+4 ----->submited
+
+/Update_Prescription_Clinic?prescription_id=
+
+0 ----> updated
+1 ----> please enter inputs
+2 ----> not found prescription
+3 ----> no access
+4 ----> not possible to update because prescription accepted from lab
+5 ----> no found clinic
+6 ----> institute not be clinic type
+7 ----> not prescription for the desired clinic
+
+/Delete_Prescription?prescription_id=
+
+0 ----> deleted
+1 ----> no access
+2 ----> not possible to update because prescription accepted from lab
+3 ----> not found prescription
+
+/Update_Prescription_Lab?prescription_id=
+
+0 ----> updated
+1 ----> please enter inputs
+2 ----> not found prescription
+3 ----> no access
+4 ----> not possible to update because prescription accepted by drlab
+5 ----> no found lab
+6 ----> institute not be lab type
+7 ----> not prescription for the desired lab
+8 ----> enter correct inputs
