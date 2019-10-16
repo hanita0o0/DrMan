@@ -491,8 +491,6 @@ def CreateUser():
                 list.append(i.id)
 
            if int(request.form['type_id']) in list:
-
-
                     code = request.form['code']
                     username = request.form['username']
                     password = request.form['password']
@@ -519,20 +517,25 @@ def CreateUser():
                     type_id = int(request.form['type_id'])
                     institute_id = request.form['institute_id']
                     proficiency_id = request.form['proficiency_id']
-
+                    # convert string to list
                     institute_id = institute_id.split(',')
                     proficiency_id = proficiency_id.split(',')
 
-                    for i in request.form['institute_id']:
-                       query2 = Institute.select().where(Institute.id == int(i))
+                    for i in institute_id:
+                       query2 = Institute.select().where(Institute.id == i)
                        if not query2 :
                            # invalid inistite_id
                            return jsonify(4)
-                    for k in request.form['proficiency_id']:
-                        query3 = Proficiency.select().where(Proficiency.id == int(k))
+                    # convert list to string
+                    institute_id = ','.join(institute_id)
+
+                    for k in proficiency_id:
+                        query3 = Proficiency.select().where(Proficiency.id == k)
                         if not query3:
                             # invalid proficiency_id
                             return jsonify(5)
+                    # convert list to string
+                    proficiency_id = ','.join(proficiency_id)
 
                     row = Type.select().where(Type.name == 'patient').get()
                     row1 = Type.select().where((Type.name == 'drclinic') | (Type.name == 'drlab'))

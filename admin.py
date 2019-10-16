@@ -1,4 +1,4 @@
-from flask import Flask,jsonify,request
+from flask import Flask, jsonify, request, send_from_directory
 from peewee import *
 from argon2 import PasswordHasher
 from flask_cors import CORS
@@ -6,6 +6,7 @@ import datetime
 import jwt
 import uuid
 from functools import wraps
+import os
 
 
 
@@ -16,6 +17,7 @@ PORT = 5000
 app = Flask(__name__)
 app.debug = True
 cors = CORS(app, resources={r"*": {"origins": "*"}})
+ADMIN ="admin"
 
 #//////////////////////////////////////////////////////////////////
 DATABASE = MySQLDatabase("drman",user = 'root' ,host = 'localhost')
@@ -368,9 +370,9 @@ def token_required(f):
 
 #///////////////////////////////////routs
 
-@app.route('/loginadmin',methods=['POST'])
+@app.route('/LoginAdmin',methods=['POST'])
 def loginadmin():
-        row = Type.select().where(Type.name == "admin").get()
+        row = Type.select().where(Type.name == ADMIN).get()
         type_admin_id = row.id
         json_data = request.get_json(force=True)
         if json_data['username'] and json_data['password'] :
@@ -431,7 +433,7 @@ def ListTypeInstitute():
 @token_required
 def CreateInstitute(current_user):
     # just admin can create institute
-    row = Type.select().where(Type.name == "admin").get()
+    row = Type.select().where(Type.name == ADMIN).get()
     admin_id = row.id
     if current_user.type_id == admin_id :
         json_data = request.get_json(force=True)
@@ -481,14 +483,81 @@ def CreateInstitute(current_user):
         return jsonify(4)
 
 
-@app.route('/create' , methods=['POST'])
-def Create():
-    json_data = request.files
-    if (json_data):
-        return "ok"
-    else:
-        return "no"
+@app.route('/ListDr_Wait' , methods=['GET'])
+@token_required
+def ListDr_Wait(current_user):
+    # just admin can create institute
+    row = Type.select().where(Type.name == ADMIN).get()
+    admin_id = row.id
+    if current_user.type_id == admin_id:
+        query1 = Type.select().where((Type.name == 'drclinic') | (Type.name == 'drlab'))
+        list = []
+        for i in query1:
+            list.append(i.id)
 
+        list_doctors = []
+        for j in list:
+
+          query2 = Temp_User.select().where(Temp_User.type_id == j)
+          if query2:
+            list_dr = []
+
+            for i in query2:
+
+                dict={}
+                proficiency = i.temp_proficiency
+                institute = i.temp_institute
+                type_id = i.type_id
+
+                list_pro = []
+                list_inst =[]
+                # covert string to list
+                proficiency = proficiency.split(',')
+                for h in proficiency:
+                    q = Proficiency.select().where(Proficiency.id == h).get()
+
+                    list_pro.append(q.name)
+                 # convert string to list
+                institute = institute.split(',')
+                for y in institute:
+                    p = Institute.select().where(Institute.id == y).get()
+                    list_inst.append(p.name)
+
+                query3 = Type.select().where(Type.id == type_id)
+                for n in query3:
+                    dict['type_id'] = n.name
+
+                dict['id'] = i.id
+                dict['name'] = i.name
+                dict['family'] = i.family
+                dict['path'] = i.path
+                dict['username']= i.username
+                dict['mobile'] = i.mobile
+                dict['tel'] = i.tel
+                dict['proficiency'] = list_pro
+                dict['institute'] = list_inst
+                dict['email'] = i.email
+
+                list_dr.append(dict)
+            list_doctors.append(list_dr)
+        return jsonify(list_doctors)
+    # no found user
+    return jsonify(0)
+
+@app.route('/Uploads/<path:path>',methods=['GET'])
+@token_required
+def getFile(current_user,path):
+    # just admin can create institute
+    row = Type.select().where(Type.name == ADMIN).get()
+    admin_id = row.id
+
+    if current_user.type_id == admin_id:
+
+        dirname = os.path.dirname(__file__)
+        return send_from_directory(dirname+"/Uploads", path)
+    else:
+        #no access
+        return 0
 
 if __name__ == '__main__':
     initialize()
